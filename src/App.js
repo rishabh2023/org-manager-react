@@ -1,25 +1,37 @@
-import logo from './logo.svg';
-import './App.css';
+// src/App.js
+import { Routes, Route, Navigate } from "react-router-dom";
 
-function App() {
+// Auth
+import Login from "./auth/Login";
+import Register from "./auth/Register";
+
+// Common
+import NotFound from "./common/NotFound";
+
+// Organisation views
+
+import ProtectedRoute from "./routes/ProtectedRoute";
+import OrganizationsList from "./organisation/views/OrganizationsList";
+import OrganizationCreate from "./organisation/views/OrganizationCreate";
+import OrganizationEdit from "./organisation/views/OrganizationEdit";
+
+export default function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Routes>
+      {/* Public */}
+      <Route path="/login" element={<Login />} />
+      <Route path="/signup" element={<Register />} />
+
+      {/* Protected section */}
+      <Route element={<ProtectedRoute />}>
+        <Route path="/" element={<Navigate to="/organizations" replace />} />
+        <Route path="/organizations" element={<OrganizationsList />} />
+        <Route path="/organizations/new" element={<OrganizationCreate />} />
+        <Route path="/organizations/:id" element={<OrganizationEdit />} />
+      </Route>
+
+      {/* 404 */}
+      <Route path="*" element={<NotFound />} />
+    </Routes>
   );
 }
-
-export default App;
