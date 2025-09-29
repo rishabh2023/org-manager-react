@@ -6,10 +6,12 @@ import ErrorBanner from "../components/ErrorBanner";
 import EmptyState from "../components/EmptyState";
 import OrgCard from "../components/OrgCard";
 import Toolbar from "../components/Toolbar";
+import ConfirmDialog from "../components/ConfirmDialog";
 
 export default function OrganizationsList() {
   const [items, setItems] = useState(null);
   const [err, setErr] = useState("");
+  const [confirmId, setConfirmId] = useState(null); // holds org id for deletion
 
   const fetchAll = async () => {
     try {
@@ -22,12 +24,17 @@ export default function OrganizationsList() {
   };
 
   const handleDelete = async (id) => {
-    if (!window.confirm("Delete this organization?")) return;
+    setConfirmId(id); // open dialog
+  };
+
+  const confirmDelete = async () => {
     try {
-      await OrgAPI.remove(id);
-      setItems((prev) => prev.filter((x) => x.id !== id));
+      await OrgAPI.remove(confirmId);
+      setItems((prev) => prev.filter((x) => x.id !== confirmId));
     } catch (e) {
       setErr(e.message);
+    } finally {
+      setConfirmId(null); // close dialog
     }
   };
 
@@ -73,13 +80,22 @@ export default function OrganizationsList() {
           ) : (
             <div className="grid sm:grid-cols-2 gap-4">
               {items.map((org) => (
-                <OrgCard key={org.id} org={org} onDelete={handleDelete} />
+                <OrgCard key={org.id} org={org} onDelete={() => handleDelete(org.id)} />
               ))}
             </div>
           )}
         </div>
         <div className="h-1 w-full bg-gradient-to-r from-blue-500 via-indigo-500 to-emerald-500" />
       </div>
+
+      {/* Confirmation Modal */}
+      <ConfirmDialog
+        open={!!confirmId}
+        title="Delete Organization"
+        message="Are you sure you want to delete this organization? This action cannot be undone."
+        onConfirm={confirmDelete}
+        onCancel={() => setConfirmId(null)}
+      />
     </div>
   );
 }
